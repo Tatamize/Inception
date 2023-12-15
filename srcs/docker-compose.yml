@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    hostname: nginx
+    build:  
+      context: ./requirements/nginx
+      args:
+        ARG_USER: ${ARG_USER}
+        ARG_DOMAIN: ${ARG_DOMAIN}
+    ports:
+      - "443:443"
+    volumes:
+    - data_wp:/var/www/html
+    networks:
+      - docker-network
+    depends_on:
+      - wordpress
+    restart: unless-stopped
+    init: true
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    hostname: wordpress
+    build:
+      context: ./requirements/wordpress
+      args:
+        ARG_PASS_SQL: ${ARG_PASS_SQL}
+        ARG_USER: ${ARG_USER}
+        ARG_DB: ${ARG_DB}
+    volumes:
+      - data_wp:/var/www/html
+    networks:
+      - docker-network
+    depends_on:
+      - mariadb
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+    env_file: .env
+    init: true
+
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    hostname: mariadb
+    build: 
+      context: ./requirements/mariadb
+      args:
+        ARG_PASS_SQL: ${ARG_PASS_SQL}
+        ARG_PASS_ROOT: ${ARG_PASS_ROOT}
+        ARG_USER: ${ARG_USER}
+        ARG_DOMAIN: ${ARG_DOMAIN}
+    volumes:
+      - data_mysql:/var/lib/mysql
+    networks:
+      - docker-network
+    ports:
+     - "3306:3306"
+    restart: unless-stopped
+    init: true
+
+
+networks:
+  docker-network:
+    name: docker-network
+    driver: bridge
+
+
+volumes:
+  data_mysql:
+    driver: local
+    name: data_mysql
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SQL_VOLUME}
+  data_wp:
+    driver: local
+    name: data_wp
+    driver_opts:
+      type: none
+      o: bind
+      device: ${WP_VOLUME}
