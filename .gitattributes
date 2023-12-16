@@ -3,3 +3,4 @@ mlx/* linguist-vendored
 *.pdf linguist-vendored
 *.png linguist-vendored
 *.jpg linguist-vendored
+*.php linguist-vendored
