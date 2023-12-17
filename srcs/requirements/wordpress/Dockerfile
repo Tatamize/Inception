@@ -1,9 +1,5 @@
 FROM debian:buster
 
-# These ARG are default dammy value and will be replaced by .env
-ARG ARG_PASS_SQL=test
-ARG ARG_USER=test
-ARG ARG_DB=test
 
 WORKDIR /var/www/html/
 
@@ -37,8 +33,7 @@ RUN apt-get update  && \
     chown -R www-data:www-data /var/www/html && \
     chmod +x /var/www/wp_setup.sh && \
     wp cli update && \
-    wp core download --allow-root &&\
-    sed -i -e "s/ARG_DB/$ARG_DB/" -e "s/ARG_USER/$ARG_USER/" -e "s/ARG_PASS_SQL/$ARG_PASS_SQL/" /var/www/html/wp-config.php;
+    wp core download --allow-root
 
 EXPOSE 9000
 
